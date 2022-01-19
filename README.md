@@ -3,13 +3,6 @@
 
 E2E testing for dApps using Puppeteer + Polkadot.js Extension
 
-## Installation
-
-```
-$ npm install -s @zeroio/polkateer
-$ yarn add @zeroio/polkateer
-```
-
 ## Usage
 
 ```js
