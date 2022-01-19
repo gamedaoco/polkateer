@@ -22,7 +22,7 @@ class DappeteerEnvironment extends NodeEnvironment {
       browserWSEndpoint: wsEndpoint,
     });
     this.global.browser = browser;
-    this.global.metamask = await getMetamaskWindow(browser);
+    this.global.metamask = await getPolkadotjsWindow(browser);
     this.global.page = await browser.newPage();
   }
 }
