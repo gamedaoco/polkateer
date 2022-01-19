@@ -1,15 +1,15 @@
 import * as puppeteer from 'puppeteer';
 import { Page } from 'puppeteer';
 
-import { getMetamask } from './metamask';
+import { getPolkadotjs } from './wallet';
 import downloader, { Path } from './polkadotjsDownloader';
 import { isNewerVersion } from './utils';
 
 // re-export
-export { getMetamask };
+export { getPolkadotjs };
 
 export type LaunchOptions = Parameters<typeof puppeteer['launch']>[0] & {
-  version: 'v10.8.1' | 'latest' | string;
+  version: 'v0.42.6' | 'latest' | string;
   pathLocation?: Path;
 };
 
@@ -48,7 +48,7 @@ export type TransactionOptions = {
   gasLimit?: number;
 };
 
-export const RECOMMENDED_METAMASK_VERSION = 'v10.8.1';
+export const RECOMMENDED_METAMASK_VERSION = 'v0.42.6';
 
 /**
  * Launch Puppeteer chromium instance with MetaMask plugin installed
@@ -102,7 +102,7 @@ const defaultMetamaskOptions: MetamaskOptions = {
   showTestNets: true,
 };
 
-export async function setupMetamask(
+export async function setupPolkadotjs(
   browser: puppeteer.Browser,
   options: MetamaskOptions = defaultMetamaskOptions,
 ): Promise<Dappeteer> {
@@ -116,7 +116,7 @@ export async function setupMetamask(
 
   await importAccount(
     page,
-    options.seed || 'already turtle birth enroll since owner keep patch skirt drift any dinner',
+    options.seed || 'hope clutch worth stone glue frown humble sport minute bid dynamic chicken',
     options.password || 'password1234',
     options.hideSeed,
   );
@@ -125,13 +125,13 @@ export async function setupMetamask(
 
   await showTestNets(page);
 
-  return getMetamask(page);
+  return getPolkadotjs(page);
 }
 
 /**
  * Return MetaMask instance
  * */
-export async function getMetamaskWindow(browser: puppeteer.Browser, version?: string): Promise<Dappeteer> {
+export async function getPolkadotjsWindow(browser: puppeteer.Browser, version?: string): Promise<Dappeteer> {
   const metamaskPage = await new Promise<puppeteer.Page>((resolve) => {
     browser.pages().then((pages) => {
       for (const page of pages) {
@@ -140,7 +140,7 @@ export async function getMetamaskWindow(browser: puppeteer.Browser, version?: st
     });
   });
 
-  return getMetamask(metamaskPage, version);
+  return getPolkadotjs(metamaskPage, version);
 }
 
 async function closeHomeScreen(browser: puppeteer.Browser): Promise<puppeteer.Page> {

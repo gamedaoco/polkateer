@@ -36,9 +36,9 @@ describe('dappeteer', () => {
   before(async () => {
     testContract = await deploy();
     browser = await dappeteer.launch(puppeteer, {
-      metamaskVersion: process.env.METAMASK_VERSION || RECOMMENDED_METAMASK_VERSION,
+      version: process.env.METAMASK_VERSION || RECOMMENDED_METAMASK_VERSION,
     });
-    metamask = await dappeteer.setupMetamask(browser, {
+    metamask = await dappeteer.setupPolkadotjs(browser, {
       // optional, else it will use a default seed
       seed: 'pioneer casual canoe gorilla embrace width fiction bounce spy exhibit another dog',
       password: 'password1234',

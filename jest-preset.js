@@ -1,5 +1,5 @@
 module.exports = {
-  globalSetup: `@chainsafe/dappeteer/dist/jest/setup.js`,
-  globalTeardown: `@chainsafe/dappeteer/dist/jest/teardown.js`,
-  testEnvironment: `@chainsafe/dappeteer/dist/jest//DappeteerEnvironment.js`,
+  globalSetup: `src/jest/setup.js`,
+  globalTeardown: `src/jest/teardown.js`,
+  testEnvironment: `src/jest/Environment.js`,
 };

@@ -15,16 +15,16 @@ export type Path =
     };
 
 export default async (version: string, location?: Path): Promise<string> => {
-  const metamaskDirectory = typeof location === 'string' ? location : location?.extract || defaultDirectory;
+  const polkadotjsDirectory = typeof location === 'string' ? location : location?.extract || defaultDirectory;
   const downloadDirectory =
     typeof location === 'string' ? location : location?.download || path.resolve(defaultDirectory, 'download');
 
   if (version !== 'latest') {
-    const extractDestination = path.resolve(metamaskDirectory, version.replace(/\./g, '_'));
+    const extractDestination = path.resolve(polkadotjsDirectory, version.replace(/\./g, '_'));
     if (fs.existsSync(extractDestination)) return extractDestination;
   }
   const { filename, downloadUrl, tag } = await getPolkadotjsReleases(version);
-  const extractDestination = path.resolve(metamaskDirectory, tag.replace(/\./g, '_'));
+  const extractDestination = path.resolve(polkadotjsDirectory, tag.replace(/\./g, '_'));
   if (!fs.existsSync(extractDestination)) {
     const downloadedFile = await downloadPolkadotjsReleases(filename, downloadUrl, downloadDirectory);
     const zip = new StreamZip.async({ file: downloadedFile });

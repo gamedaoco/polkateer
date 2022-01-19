@@ -36,6 +36,6 @@ async function main() {
 main();
 ```
 
-- All methods can be found on [API page](docs/API.md)  
-- Instructions to setup [with Jest](docs/JEST.md)  
-- Mocha example can be found [inside test folder](./test)
+####
+
+Inspired by dappeteer https://github.com/chainsafe/dappeteer

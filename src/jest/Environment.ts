@@ -1,7 +1,7 @@
 import NodeEnvironment from 'jest-environment-node';
 import puppeteer from 'puppeteer';
 
-import { getMetamaskWindow } from '../index';
+import { getPolkadotjsWindow } from '../index';
 
 class DappeteerEnvironment extends NodeEnvironment {
   constructor(config) {
