@@ -1,6 +1,6 @@
 import { Page } from 'puppeteer';
 
-import { Dappeteer } from '..';
+import { Polkateer } from '..';
 
 import { addNetwork } from './addNetwork';
 import { addToken } from './addToken';
@@ -17,7 +17,7 @@ import { unlock } from './unlock';
 export type SetSignedIn = (state: boolean) => Promise<void>;
 export type GetSingedIn = () => Promise<boolean>;
 
-export const getPolkadotjs = async (page: Page, version?: string): Promise<Dappeteer> => {
+export const getPolkadotjs = async (page: Page, version?: string): Promise<Polkateer> => {
   // modified window object to kep state between tests
   const setSignedIn = async (state: boolean): Promise<void> => {
     await page.evaluate((s: boolean) => {

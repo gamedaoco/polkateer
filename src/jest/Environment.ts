@@ -3,7 +3,7 @@ import puppeteer from 'puppeteer';
 
 import { getPolkadotjsWindow } from '../index';
 
-class DappeteerEnvironment extends NodeEnvironment {
+class PolkateerEnvironment extends NodeEnvironment {
   constructor(config) {
     super(config);
   }
@@ -22,9 +22,9 @@ class DappeteerEnvironment extends NodeEnvironment {
       browserWSEndpoint: wsEndpoint,
     });
     this.global.browser = browser;
-    this.global.metamask = await getPolkadotjsWindow(browser);
+    this.global.polkadotjs = await getPolkadotjsWindow(browser);
     this.global.page = await browser.newPage();
   }
 }
 
-module.exports = DappeteerEnvironment;
+module.exports = PolkateerEnvironment;

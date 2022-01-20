@@ -5,7 +5,7 @@ import * as path from 'path';
 
 import StreamZip from 'node-stream-zip';
 
-const defaultDirectory = path.resolve(__dirname, '..', 'metamask');
+const defaultDirectory = path.resolve(__dirname, '..', 'polkadotjs');
 
 export type Path =
   | string
@@ -86,9 +86,10 @@ const getPolkadotjsReleases = (version: string): Promise<PolkadotjsReleases> =>
         if (data.message) return reject(data.message);
         for (const result of data) {
           if (result.draft) continue;
-          if (version === 'latest' || result.name.includes(version) || result.tag_name.includes(version)) {
+          
+          if (version === 'latest' || result.name === version || result.tag_name === version || result.name.includes(version) || result.tag_name.includes(version)) {
             for (const asset of result.assets) {
-              if (asset.name.includes('chrome'))
+              if (asset.name === "master-build.zip")
                 resolve({
                   downloadUrl: asset.browser_download_url,
                   filename: asset.name,

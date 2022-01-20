@@ -5,10 +5,10 @@ import path from 'path';
 import { expect } from 'chai';
 import puppeteer from 'puppeteer';
 
-import { RECOMMENDED_METAMASK_VERSION } from '../src';
-import * as dappeteer from '../src/index';
+import { RECOMMENDED_POLKADOTJS_VERSION } from '../src';
+import * as polkateer from '../src/index';
 
-import deploy from './deploy';
+// import deploy from './deploy';
 
 function pause(seconds: number): Promise<void> {
   return new Promise((res) => setTimeout(res, 1000 * seconds));
@@ -30,49 +30,58 @@ async function clickElement(page, selector): Promise<void> {
   await element.click();
 }
 
-let testContract, browser, metamask, testPage;
+let testContract, browser, polka, testPage;
 
-describe('dappeteer', () => {
+describe('polkateer', () => {
+
   before(async () => {
-    testContract = await deploy();
-    browser = await dappeteer.launch(puppeteer, {
-      version: process.env.METAMASK_VERSION || RECOMMENDED_METAMASK_VERSION,
+    //testContract = await deploy();
+
+    browser = await polkateer.launch(puppeteer, {
+      version: process.env.POLKADOTJS_VERSION || RECOMMENDED_POLKADOTJS_VERSION,
     });
-    metamask = await dappeteer.setupPolkadotjs(browser, {
+
+    polka = await polkateer.setupPolkadotjs(browser, {
       // optional, else it will use a default seed
       seed: 'pioneer casual canoe gorilla embrace width fiction bounce spy exhibit another dog',
       password: 'password1234',
     });
+
+    console.log("sfddfdf")
+
     testPage = await browser.newPage();
+    
     await testPage.goto('localhost:8080');
 
     // output version
-    const directory = path.resolve(__dirname, '..', 'metamask');
+    const directory = path.resolve(__dirname, '..', 'wallet');
     const files = await readdir(directory);
     console.log(`::set-output name=version::${files.pop().replace(/_/g, '.')}`);
   });
 
+  /*
   it('should be deployed, contract', async () => {
     assert.ok(testContract);
     assert.ok(testContract.address);
     assert.ok(testContract.options.address);
   });
+  */
 
   it('should running, puppeteer', async () => {
     assert.ok(browser);
   });
 
-  it('should open, metamask', async () => {
-    assert.ok(metamask);
+  it('should open, polka', async () => {
+    assert.ok(polka);
   });
 
   it('should open, test page', async () => {
     assert.ok(testPage);
-    assert.equal(await testPage.title(), 'Local metamask test');
+    assert.equal(await testPage.title(), 'Local polka test');
   });
 
   it('should add network', async () => {
-    await metamask.addNetwork({
+    await polka.addNetwork({
       networkName: 'Binance Smart Chain',
       rpc: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
       chainId: 97,
@@ -80,43 +89,43 @@ describe('dappeteer', () => {
       explorer: 'https://testnet.bscscan.com',
     });
 
-    const selectedNetwork = await metamask.page.evaluate(
+    const selectedNetwork = await polka.page.evaluate(
       () => (document.querySelector('.network-display > span:nth-child(2)') as HTMLSpanElement).innerHTML,
     );
     assert.equal(selectedNetwork, 'Binance Smart Chain');
   });
 
   it('should switch network, localhost', async () => {
-    await metamask.switchNetwork('localhost');
+    await polka.switchNetwork('localhost');
 
-    const selectedNetwork = await metamask.page.evaluate(
+    const selectedNetwork = await polka.page.evaluate(
       () => (document.querySelector('.network-display > span:nth-child(2)') as HTMLSpanElement).innerHTML,
     );
     assert.equal(selectedNetwork, 'Localhost 8545');
   });
 
   it('should import private key', async () => {
-    await metamask.importPK('4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b10');
+    await polka.importPK('4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b10');
   });
 
   it('should switch accounts', async () => {
-    await metamask.switchAccount(1);
+    await polka.switchAccount(1);
   });
 
   it('should add token', async () => {
-    await metamask.switchNetwork('kovan');
-    await metamask.addToken('0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa');
-    await metamask.switchNetwork('localhost');
+    await polka.switchNetwork('zero');
+    await polka.addToken('0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa');
+    await polka.switchNetwork('localhost');
   });
 
   it('should lock and unlock', async () => {
-    await metamask.lock();
-    await metamask.unlock('password1234');
+    await polka.lock();
+    await polka.unlock('password1234');
   });
 
   it('should connect to ethereum', async () => {
     await clickElement(testPage, '.connect-button');
-    await metamask.approve();
+    await polka.approve();
 
     // For some reason initial approve does not resolve nor fail promise
     await clickElement(testPage, '.connect-button');
@@ -125,18 +134,18 @@ describe('dappeteer', () => {
 
   it('should be able to sign', async () => {
     await clickElement(testPage, '.sign-button');
-    await metamask.sign();
+    await polka.sign();
 
     await testPage.waitForSelector('#signed');
   });
 
   it('should return token balance', async () => {
-    const tokenBalance: number = await metamask.getTokenBalance('ETH');
+    const tokenBalance: number = await polka.getTokenBalance('ETH');
     expect(tokenBalance).to.be.greaterThan(0);
   });
 
   it('should return 0 token balance when token not found', async () => {
-    const tokenBalance: number = await metamask.getTokenBalance('FARTBUCKS');
+    const tokenBalance: number = await polka.getTokenBalance('FARTBUCKS');
     expect(tokenBalance).to.be.equal(0);
   });
 
@@ -152,7 +161,7 @@ describe('dappeteer', () => {
       await clickElement(testPage, '.increase-button');
 
       // submit tx
-      await metamask.confirmTransaction();
+      await polka.confirmTransaction();
       await testPage.waitForSelector('#txSent');
     });
 
@@ -177,7 +186,7 @@ describe('dappeteer', () => {
     // submit tx
     await Promise.all([
       testPage.waitForSelector('#txSent'),
-      metamask.confirmTransaction({
+      polka.confirmTransaction({
         gas: 20,
         gasLimit: 400000,
       }),
