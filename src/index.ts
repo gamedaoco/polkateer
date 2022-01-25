@@ -5,6 +5,9 @@ import { getPolkadotjs } from './wallet';
 import downloader, { Path } from './polkadotjsDownloader';
 import { isNewerVersion } from './utils';
 
+import { importSeed, importSeedOptions } from './wallet/importSeed';
+
+
 // re-export
 export { getPolkadotjs };
 
@@ -18,6 +21,7 @@ export type PolkadotjsOptions = {
   password?: string;
   showTestNets?: boolean;
   hideSeed?: boolean;
+  name?: string;
 };
 
 export type AddNetwork = {
@@ -29,17 +33,12 @@ export type AddNetwork = {
 };
 
 export type Polkateer = {
-  lock: () => Promise<void>;
-  unlock: (password: string) => Promise<void>;
-  addNetwork: (options: AddNetwork) => Promise<void>;
-  importPK: (pk: string) => Promise<void>;
-  switchAccount: (accountNumber: number) => Promise<void>;
+  allow: () => Promise<void>;
+  openAccountsPopup:  () => Promise<void>;
+  openSettingsPopup:  () => Promise<void>;
+  importSeed: (options: importSeedOptions) => Promise<void>;
   switchNetwork: (network: string) => Promise<void>;
   confirmTransaction: (options?: TransactionOptions) => Promise<void>;
-  sign: () => Promise<void>;
-  approve: () => Promise<void>;
-  addToken: (tokenAddress: string) => Promise<void>;
-  getTokenBalance: (tokenSymbol: string) => Promise<number>;
   page: Page;
 };
 
@@ -112,24 +111,26 @@ export async function setupPolkadotjs(
     if (options[key] === undefined) options[key] = defaultPolkadotjsOptions[key];
   }
 
-  const page = await getExtensionPage(browser);
+  const page = await getExtensionPage(browser)
+  page.bringToFront()
 
-  console.log("sdfdfdf")
   await confirmWelcomeScreen(page);
 
-  await importAccount(
-    page,
-    options.seed || 'hope clutch worth stone glue frown humble sport minute bid dynamic chicken',
-    options.password || 'password1234',
-    options.hideSeed,
-  );
-
-  await closeNotificationPage(browser);
-
-  await showTestNets(page);
+  await importSeed(page)({
+    seed: options.seed || 'hope clutch worth stone glue frown humble sport minute bid dynamic chicken',
+    password: options.password || 'password1234',
+    name: options.name || "Polkateer_Account_0",
+  });
 
   return getPolkadotjs(page);
 }
+
+
+export async function confirmWelcomeScreen(polkadotjsPage: puppeteer.Page): Promise<void> {
+  const trigger = await polkadotjsPage.waitForSelector('button');
+  await trigger.click();
+}
+
 
 /**
  * Return Polkadotjs instance
@@ -143,110 +144,23 @@ export async function getPolkadotjsWindow(browser: puppeteer.Browser, version?: 
     });
   });
 
-  return getPolkadotjs(polkadotjsPage, version);
+  return getPolkadotjs(polkadotjsPage);
 }
 
-async function closeHomeScreen(browser: puppeteer.Browser): Promise<puppeteer.Page> {
-  return new Promise((resolve, reject) => {
-    console.log("sfdf")
-    browser.on('targetcreated', async (target) => {
-      console.log("targetcreated")
-      console.log(target.url())
-      console.log(target.url().match('chrome-extension://[a-z]+/index.html'))
-      if (target.url().match('chrome-extension://[a-z]+/index.html')) {
-        try {
-          const page = await target.page();
-          console.log("sfdf")
-          resolve(page);
-        } catch (e) {
-          reject(e);
-        }
-      }
-    });
-  });
-}
-
-async function getExtensionPage(browser: puppeteer.Browser): Promise<puppeteer.Page> {
+  // extract extension id
+  async function getExtensionPage(browser: puppeteer.Browser): Promise<puppeteer.Page> {
     const page = await browser.newPage();
-    console.log("sddfdsfdsdsf")
-    //await page.goto(`sj`);
+
+    await page.goto("about:extensions")
+    await page.waitForSelector("extensions-manager")
+
+    const id = await page.evaluate(() => {
+      let manager = document.querySelector("extensions-manager").shadowRoot
+      let extensionList = manager.querySelector("extensions-item-list").shadowRoot
+      let extensionId = extensionList.querySelector("extensions-item").id
+      return extensionId
+    })
+
+    await page.goto(`chrome-extension://${id}/index.html#/`)
     return page
-}
-
-async function closeNotificationPage(browser: puppeteer.Browser): Promise<void> {
-  browser.on('targetcreated', async (target) => {
-    if (target.url().match('chrome-extension://[a-z]+/notification.html')) {
-      try {
-        const page = await target.page();
-        await page.close();
-      } catch {
-        return;
-      }
-    }
-  });
-}
-
-async function showTestNets(polkadotjsPage: puppeteer.Page): Promise<void> {
-  const networkSwitcher = await polkadotjsPage.waitForSelector('.network-display');
-  await networkSwitcher.click();
-  await polkadotjsPage.waitForSelector('li.dropdown-menu-item');
-
-  const showHideButton = await polkadotjsPage.waitForSelector('.network-dropdown-content--link');
-  await showHideButton.click();
-
-  const option = await polkadotjsPage.waitForSelector(
-    '.settings-page__body > div:nth-child(7) > div:nth-child(2) > div > div > div:nth-child(1)',
-  );
-  await option.click();
-
-  const header = await polkadotjsPage.waitForSelector('.app-header__logo-container');
-  await header.click();
-}
-
-async function confirmWelcomeScreen(polkadotjsPage: puppeteer.Page): Promise<void> {
-  const continueButton = await polkadotjsPage.waitForSelector('.welcome-page button');
-  await continueButton.click();
-}
-
-async function importAccount(
-  polkadotjsPage: puppeteer.Page,
-  seed: string,
-  password: string,
-  hideSeed: boolean,
-): Promise<void> {
-  const importLink = await polkadotjsPage.waitForSelector('.first-time-flow button');
-  await importLink.click();
-
-  const metricsOptOut = await polkadotjsPage.waitForSelector('.metametrics-opt-in button.btn-primary');
-  await metricsOptOut.click();
-
-  if (hideSeed) {
-    const seedPhraseInput = await polkadotjsPage.waitForSelector('.first-time-flow__seedphrase input[type=password]');
-    await seedPhraseInput.click();
-    await seedPhraseInput.type(seed);
-  } else {
-    const showSeedPhraseInput = await polkadotjsPage.waitForSelector('#ftf-chk1-label');
-    await showSeedPhraseInput.click();
-
-    const seedPhraseInput = await polkadotjsPage.waitForSelector('.first-time-flow textarea');
-    await seedPhraseInput.type(seed);
-  }
-
-  const passwordInput = await polkadotjsPage.waitForSelector('#password');
-  await passwordInput.type(password);
-
-  const passwordConfirmInput = await polkadotjsPage.waitForSelector('#confirm-password');
-  await passwordConfirmInput.type(password);
-
-  const acceptTerms = await polkadotjsPage.waitForSelector('.first-time-flow__terms');
-  await acceptTerms.click();
-
-  const restoreButton = await polkadotjsPage.waitForSelector('.first-time-flow button');
-  await restoreButton.click();
-
-  const doneButton = await polkadotjsPage.waitForSelector('.end-of-flow button');
-  await doneButton.click();
-
-  const popupButton = await polkadotjsPage.waitForSelector('.popover-header__button');
-  await popupButton.click();
 }

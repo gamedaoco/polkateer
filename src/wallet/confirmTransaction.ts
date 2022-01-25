@@ -2,16 +2,11 @@ import { Page } from 'puppeteer';
 
 import { TransactionOptions } from '..';
 
-import { GetSingedIn } from './index';
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const confirmTransaction = (page: Page, getSingedIn: GetSingedIn, version?: string) => async (
+export const confirmTransaction = (page: Page) => async (
   options?: TransactionOptions,
 ): Promise<void> => {
   await page.bringToFront();
-  if (!(await getSingedIn())) {
-    throw new Error("You haven't signed in yet");
-  }
   await page.waitForTimeout(500);
   await page.reload();
 
