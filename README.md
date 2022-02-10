@@ -1,5 +1,6 @@
 # Polkateer
-## WIP Not ready for Usage WIP
+## alpha version
+(in active usage and development)
 
 E2E testing for dApps using Puppeteer + Polkadot.js Extension
 
